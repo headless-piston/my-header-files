@@ -85,7 +85,7 @@ private:
         root->color=Color::BLACK;//root is black
         return;
     }
-	void left_rotate(node* n){
+    void left_rotate(node* n){
         /*
         **      |                     |
         **      N                     S
@@ -93,7 +93,7 @@ private:
         **    L   S   ==========>   N   R
         **       / \               / \
         **      M   R             L   M
-		*/
+        */
         node* s=n->rs;
         n->rs=s->ls;
         if(s->ls!=NIL)
@@ -107,9 +107,9 @@ private:
             n->pt->rs=s;
         s->ls=n;
         n->pt=s;
-		return;
-	}
-	void right_rotate(node* n){
+        return;
+    }
+    void right_rotate(node* n){
         /*
         **      |                     |
         **      N                     S
@@ -131,8 +131,8 @@ private:
             n->pt->ls=s;
         s->rs=n;
         n->pt=s;
-		return;
-	}
+        return;
+    }
     void destroy(node* u){//free node memory
         if(u==NIL)
             return;
@@ -143,7 +143,7 @@ private:
             free_list.push_back(u);//recycle node
         return;
     }
-public:
+    public:
     RBTree(){
         init_NIL();
     }
@@ -156,15 +156,15 @@ public:
         while(x!=NIL){
             y=x;
             if(k==x->key){
-				x->val=v;
-				return;
-			}
-			if(k<x->key)
-				x=x->ls;
-			else
-				x=x->rs;
+                x->val=v;
+                return;
+            }
+            if(k<x->key)
+                x=x->ls;
+            else
+                x=x->rs;
         }
-		node* z=new_node(k,v);
+        node* z=new_node(k,v);
         z->pt=y;
         if(y==NIL)
             root=z;//tree is empty
