@@ -1,7 +1,7 @@
 //disjoint_set_union
 #ifndef MY_DSU
 #define MY_DSU
-template<unsigned siz_of_set>
+template<const unsigned siz_of_set>
 class dsu{
     private:
         unsigned fa[siz_of_set+1],siz[siz_of_set+1];
@@ -22,10 +22,13 @@ class dsu{
                 return;
             if(siz[y]<siz[x])
                 x^=y^=x^=y;//swap(x,y)
-            if(siz[x]==siz[y])
-                siz[y]=siz[x]+1;
             fa[x]=y;
+            siz[y]+=siz[x];
             return;
+        }
+        unsigned size(unsigned x){
+            x=find(x);
+            return siz[x];
         }
 };
 #endif
