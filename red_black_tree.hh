@@ -1,9 +1,11 @@
 //red black tree
 #ifndef RED_BLACK_TREE
 #define RED_BLACK_TREE
+#include<vector>
+#include<cassert>
 //define color enumeration
 enum class Color {RED,BLACK};
-template<typename Key,typename Val>
+template<typename Key,typename Val,const unsigned Size>
 class RBTree{
 private:
     struct node{
@@ -11,16 +13,32 @@ private:
         Val val;
         Color color;
         node *ls,*rs,*pt;//left/right son,parent
-        node(Key k,Val v):key(k),val(v),color(Color::RED),ls(nullptr),rs(nullptr),pt(nullptr)
-        {}
+        node():color(Color::BLACK),ls(nullptr),rs(nullptr),pt(nullptr){}
+        node(Key k,Val v):key(k),val(v),color(Color::RED),ls(nullptr),rs(nullptr),pt(nullptr){}
     };
+    node tree[Size+1];
     node* root;
     node* NIL;//sentinel node,represents null
+    std::vector<node*> free_list;//free node list
     void init_NIL(){
-        NIL=new node(Key(),Val());
+        NIL=&tree[0];
+        NIL->key=Key();
+        NIL->val=Val();
         NIL->color=Color::BLACK;//sentinel is black
         NIL->ls=NIL->rs=NIL->pt=NIL;
         root=NIL;
+        free_list.clear();
+        for(unsigned i=1;i<=Size;i++)
+            free_list.push_back(tree+i);
+        return;
+    }
+    node* new_node(Key k,Val v){
+        assert(!free_list.empty());//node array is full
+        node* u=free_list.back();//take last free index
+        free_list.pop_back();
+        *u=node(k,v);
+        u->ls=u->rs=NIL;
+        return u;
     }
     void fix_insert(node* z){//fix red-black tree properties after insertion
         //while parent is red,may violate properties
@@ -68,13 +86,13 @@ private:
         return;
     }
 	void left_rotate(node* n){
-		/*
-		**      |                     |
-		**      N                     S
-		**     / \    l-rotate(N)    / \
-		**    L   S   ==========>   N   R
-		**       / \               / \
-		**      M   R             L   M
+        /*
+        **      |                     |
+        **      N                     S
+        **     / \    l-rotate(N)    / \
+        **    L   S   ==========>   N   R
+        **       / \               / \
+        **      M   R             L   M
 		*/
         node* s=n->rs;
         n->rs=s->ls;
@@ -92,14 +110,14 @@ private:
 		return;
 	}
 	void right_rotate(node* n){
-		/*
-		**      |                     |
-		**      N                     S
-		**     / \    r-rotate(N)    / \
-		**    S   R   ==========>   L   N
-		**   / \                       / \
-		**  L   M                     M   R
-		*/
+        /*
+        **      |                     |
+        **      N                     S
+        **     / \    r-rotate(N)    / \
+        **    S   R   ==========>   L   N
+        **   / \                       / \
+        **  L   M                     M   R
+        */
         node* s=n->ls;
         n->ls=s->rs;
         if(s->rs!=NIL)
@@ -120,7 +138,9 @@ private:
             return;
         destroy(u->ls);
         destroy(u->rs);
-        delete u;
+        unsigned idx=u-tree;
+        if(idx>=1&&idx<=Size)
+            free_list.push_back(u);//recycle node
         return;
     }
 public:
@@ -129,7 +149,6 @@ public:
     }
     ~RBTree(){
         destroy(root);
-        delete NIL;
     }
     void insert(Key k,Val v){//insert key-value pair
         node* x=root;//start from root
@@ -138,7 +157,6 @@ public:
             y=x;
             if(k==x->key){
 				x->val=v;
-				delete new node(k,v);
 				return;
 			}
 			if(k<x->key)
@@ -146,8 +164,7 @@ public:
 			else
 				x=x->rs;
         }
-		node* z=new node(k,v);
-		z->ls=z->rs=NIL;
+		node* z=new_node(k,v);
         z->pt=y;
         if(y==NIL)
             root=z;//tree is empty
