@@ -143,7 +143,7 @@ private:
             free_list.push_back(u);//recycle node
         return;
     }
-    public:
+public:
     RBTree(){
         init_NIL();
     }
