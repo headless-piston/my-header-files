@@ -47,6 +47,27 @@ public:
         if(temp||len==0)
             num[++len]=temp;
     }
+    bool operator<(const bigint &a)const{
+        if(num[0]&&!a.num[0])
+            return 1;
+        if(!num[0]&&a.num[0])
+            return 0;
+        if(num[0]){
+            if(len!=a.len)
+                return len>a.len;
+            for(int i=len;i;i--)
+                if(num[i]!=a.num[i])
+                    return num[i]>a.num[i];
+        }
+        else{
+            if(len!=a.len)
+                return len<a.len;
+            for(int i=len;i;i--)
+                if(num[i]!=a.num[i])
+                    return num[i]<a.num[i];
+        }
+        return 0;
+    }
     bigint operator+(const bigint &a)const{
         bigint res;
         if(num[0]==a.num[0]){
