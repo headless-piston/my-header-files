@@ -1,7 +1,7 @@
 //bigint
 #ifndef BIGINT
 #define BIGINT
-#define BASE 1000000000000000000ll//10^18
+#define BASE 100ll//Due to the precision issues of FFT,more aggressive digit compression cannot be performed.
 #include<cstdio>
 #include<cstring>
 #include<string>
@@ -10,7 +10,7 @@ template<const unsigned Size>
 class bigint{
 private:
     unsigned len;
-    ll num[Size];
+    int num[Size];
     void init(){
         memset(num,0,sizeof(num));
         len=1;
@@ -34,12 +34,12 @@ public:
         if(s[0]=='-')
             num[0]=f=1;
         len=0;
-        ll temp=0,w=1;
+        unsigned temp=0,w=1;
         for(int i=slen-1;i>=f;i--){
             temp+=(s[i]^48)*w;
             w=(w<<1)+(w<<3);
             if(w==BASE||i==f){
-                num[++len]=temp;
+                num[++len]=(int)temp;
                 temp=0;
                 w=1;
             }
@@ -79,7 +79,7 @@ public:
                     sum+=num[i];
                 if(i<=a.len)
                     sum+=a.num[i];
-                res.num[i]=sum%BASE;
+                res.num[i]=(int)(sum%BASE);
                 temp=sum/BASE;
             }
             if(temp)
@@ -115,6 +115,38 @@ public:
         }
         return res;
     }
+    bigint operator*(const bigint &a)const{
+        bigint res;
+        if((len==1&&num[1]==0)||(a.len==1&&a.num[1]==0))
+            return res;
+        res.num[0]=num[0]^a.num[0];
+        unsigned len_sum=1;
+        while(len_sum<len+a.len)
+            len_sum<<=1;
+        comp *fa=new comp[len_sum]();
+        comp *fb=new comp[len_sum]();
+        for(unsigned i=0;i<len;i++)
+            fa[i]={(double)num[i+1],0};
+        for(unsigned i=0;i<a.len;i++)
+            fb[i]={(double)a.num[i+1],0};
+        fft(fa,len_sum,1);
+        fft(fb,len_sum,1);
+        for(unsigned i=0;i<len_sum;i++)
+            fa[i]=fa[i]*fb[i];
+        fft(fa,len_sum,-1);
+        res.len=len+a.len;
+        ll temp=0;
+        for(unsigned i=0;i<res.len;i++){
+            ll val=(ll)(fa[i].real+0.5)+temp;
+            res.num[i+1]=(int)(val%BASE);
+            temp=val/BASE;
+        }
+        if(temp)
+            res.num[++res.len]=temp;
+        while(res.len>1&&res.num[res.len]==0)
+            res.len--;
+        return res;
+    }
     void read(){
         init();
         std::string s;
@@ -136,11 +168,12 @@ public:
         bool leading_zero=1;
         for(int i=len;i;i--){
             if(leading_zero)
-                printf("%lld",num[i]);
+                printf("%d",num[i]);
             else
-                printf("%018lld",num[i]);
+                printf("%02d",num[i]);
             leading_zero=0;
         }
+        putchar('\n');
         return;
     }
 };
