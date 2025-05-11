@@ -145,6 +145,8 @@ public:
             res.num[++res.len]=temp;
         while(res.len>1&&res.num[res.len]==0)
             res.len--;
+        delete[] fa;
+        delete[] fb;
         return res;
     }
     void read(){
