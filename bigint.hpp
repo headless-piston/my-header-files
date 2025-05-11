@@ -137,7 +137,7 @@ public:
         res.len=len+a.len;
         ll temp=0;
         for(unsigned i=0;i<res.len;i++){
-            ll val=(ll)(fa[i].real+0.5)+temp;
+            ll val=(ll)round(fa[i].real)+temp;
             res.num[i+1]=(int)(val%BASE);
             temp=val/BASE;
         }
