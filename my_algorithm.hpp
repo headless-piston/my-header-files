@@ -62,6 +62,56 @@ void fft(comp *f,unsigned n,int rev){
         for(unsigned i=0;i<n;i++)
             f[i]=f[i]/n;
 }
+template<typename T>
+T gcd(T m,T n){
+    while(n!=0){
+        int t=m%n;
+        m=n;
+        n=t;
+    }
+    return m;
+}
+template<typename T>
+T lcm(T m,T n){
+    return m/gcd(m,n)*n;
+}
+template<typename T>
+T exgcd(T a,T b,T &x,T &y){
+    if(b==0){
+        x=1,y=0;
+        return a;
+    }
+    T d=exgcd(b,a%b,y,x);
+    y-=a/b*x;
+    return d;
+}
+template<typename T>
+T phi(T n){
+    T res=n;
+    for(T i=2;i*i<=n;i++)
+        if(n%i==0){
+            res=res/i*(i-1);
+            while(n%i==0)
+                n/=i;
+        }
+    if(n>1)
+        res=res/n*(n-1);
+    return res;
+}
+template<typename Size,typename T>
+T crt(Size n,T *a,T *p){
+    T P=1;
+    for(Size i=0;i<n;i++)
+        P*=p[i];
+    T x=0;
+    for(Size i=0;i<n;i++){
+        T Pi=P/p[i];
+        T xi,yi;
+        exgcd(Pi,p[i],xi,yi);
+        x+=a[i]*Pi*xi;
+    }
+    return x%P;
+}
 typedef long long ll;
 typedef unsigned long long ull;
 #endif
