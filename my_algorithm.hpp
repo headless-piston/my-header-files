@@ -112,6 +112,20 @@ T crt(Size n,T *a,T *p){
     }
     return x%P;
 }
+template<typename Size,typename T>
+T excrt(Size n,T *a,T *p){
+    T a1=a[0],p1=p[0];
+    for(Size i=1;i<n;i++){
+        T a2=a[i],p2=p[i],xi,yi;
+        T g=exgcd(p1,p2,xi,yi);
+        if((a2-a1)%g!=0)
+            return -1;
+        T lcm=p1/g*p2,diff=(a2-a1)/g;
+        a1=a1+xi*diff%(p2/g)*p1;
+        p1=lcm;
+    }
+    return (a1+p1)%p1;
+}
 typedef long long ll;
 typedef unsigned long long ull;
 #endif
