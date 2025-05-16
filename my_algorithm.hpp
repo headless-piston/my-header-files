@@ -4,15 +4,15 @@
 #include<cmath>
 const double PI=4*atan(1);
 template<typename T>
-T Max(const T &a,const T &b){
+inline T Max(const T &a,const T &b){
     return a<b?b:a;
 }
 template<typename T>
-T Min(const T &a,const T &b){
+inline T Min(const T &a,const T &b){
     return a<b?a:b;
 }
 template<typename T>
-void Swap(T &a,T &b){
+inline void Swap(T &a,T &b){
     T c=a;
     a=b;
     b=c;
@@ -63,7 +63,7 @@ void fft(comp *f,unsigned n,int rev){
             f[i]=f[i]/n;
 }
 template<typename T>
-T gcd(T m,T n){
+inline T gcd(T m,T n){
     while(n!=0){
         int t=m%n;
         m=n;
@@ -72,7 +72,7 @@ T gcd(T m,T n){
     return m;
 }
 template<typename T>
-T lcm(T m,T n){
+inline T lcm(T m,T n){
     return m/gcd(m,n)*n;
 }
 template<typename T>
@@ -86,7 +86,7 @@ T exgcd(T a,T b,T &x,T &y){
     return d;
 }
 template<typename T>
-T phi(T n){
+inline T phi(T n){
     T res=n;
     for(T i=2;i*i<=n;i++)
         if(n%i==0){
@@ -99,7 +99,7 @@ T phi(T n){
     return res;
 }
 template<typename Size,typename T>
-T crt(Size n,T *a,T *p){
+inline T crt(Size n,T *a,T *p){
     T P=1;
     for(Size i=0;i<n;i++)
         P*=p[i];
@@ -113,7 +113,7 @@ T crt(Size n,T *a,T *p){
     return x%P;
 }
 template<typename Size,typename T>
-T excrt(Size n,T *a,T *p){
+inline T excrt(Size n,T *a,T *p){
     T a1=a[0],p1=p[0];
     for(Size i=1;i<n;i++){
         T a2=a[i],p2=p[i],xi,yi;
