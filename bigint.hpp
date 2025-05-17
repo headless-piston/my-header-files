@@ -1,7 +1,8 @@
 //bigint
 #ifndef BIGINT
 #define BIGINT
-#define BASE 100ll//Due to the precision issues of FFT,more aggressive digit compression cannot be performed.
+#define BASE 100ll
+//Due to the precision issues of FFT,more aggressive digit compression cannot be performed.
 #include<cstdio>
 #include<cstring>
 #include<string>
@@ -46,6 +47,18 @@ public:
         }
         if(temp||len==0)
             num[++len]=temp;
+    }
+    template<typename T>
+    bigint operator=(const T &a){
+        T x=a;
+        if(x<0)
+            num[0]=1,x=~x+1;
+        len=0;
+        while(x){
+            num[++len]=x%BASE;
+            x/=BASE;
+        }
+        return *this;
     }
     bool operator<(const bigint &a)const{
         if(num[0]&&!a.num[0])
@@ -114,6 +127,11 @@ public:
                 res.num[0]=0;
         }
         return res;
+    }
+    bigint operator-(const bigint &a)const{
+        bigint temp=a;
+        temp.num[0]^=1;
+        return *this+temp;
     }
     bigint operator*(const bigint &a)const{
         bigint res;
