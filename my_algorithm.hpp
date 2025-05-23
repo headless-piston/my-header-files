@@ -2,7 +2,7 @@
 #ifndef MY_ALGORITHM
 #define MY_ALGORITHM
 #include<cmath>
-const double PI=4*atan(1);
+constexpr double PI=3.14159265358979323846;
 template<typename T>
 inline T Max(const T &a,const T &b){
     return a<b?b:a;
