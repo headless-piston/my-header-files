@@ -71,9 +71,17 @@ inline T gcd(T m,T n){
     }
     return m;
 }
+template<typename T,typename...Args>
+T gcd(T m,T n,Args...args){
+    return gcd(gcd(m,n),args...);
+}
 template<typename T>
 inline T lcm(T m,T n){
     return m/gcd(m,n)*n;
+}
+template<typename T,typename...Args>
+T lcm(T m,T n,Args...args){
+    return lcm(lcm(m,n),args...);
 }
 template<typename T>
 T exgcd(T a,T b,T &x,T &y){
