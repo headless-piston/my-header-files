@@ -136,6 +136,22 @@ public:
         }
         return 1;
     }
+    bool operator==(const bigint &a)const{
+        if(len!=a.len||num[0]!=a.num[0])
+            return 0;
+        for(unsigned i=1;i<=len;i++)
+            if(num[i]!=a.num[i])
+                return 0;
+        return 1;
+    }
+    bool operator!=(const bigint &a)const{
+        if(len!=a.len||num[0]!=a.num[0])
+            return 1;
+        for(unsigned i=1;i<=len;i++)
+            if(num[i]!=a.num[i])
+                return 1;
+        return 0;
+    }
     bigint operator+(const bigint &a)const{
         bigint res;
         if(num[0]==a.num[0]){
@@ -155,7 +171,6 @@ public:
             res.num[0]=num[0];
         }
         else{
-            //bool this_large=abs_greater_equal(a)
             bool this_large=this->abs()>=a.abs();
             const bigint &larger=this_large?*this:a;
             const bigint &smaller=this_large?a:*this;
@@ -184,10 +199,18 @@ public:
         }
         return res;
     }
+    bigint operator+=(const bigint &a){
+        *this=*this+a;
+        return *this;
+    }
     bigint operator-(const bigint &a)const{
         bigint temp=a;
         temp.num[0]^=1;
         return *this+temp;
+    }
+    bigint operator-=(const bigint &a){
+        *this=*this-a;
+        return *this;
     }
     bigint operator*(const bigint &a)const{
         bigint res;
@@ -222,6 +245,10 @@ public:
         delete[] fa;
         delete[] fb;
         return res;
+    }
+    bigint operator*=(const bigint &a){
+        *this=*this*a;
+        return *this;
     }
     bigint abs()const{
         bigint res=*this;
