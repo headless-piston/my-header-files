@@ -152,31 +152,30 @@ public:
                 return 1;
         return 0;
     }
-    bigint operator+(const bigint &a)const{
-        bigint res;
+    bigint &operator+=(const bigint &a){
         if(num[0]==a.num[0]){
             ll temp=0;
-            res.len=Max(len,a.len);
-            for(unsigned i=1;i<=res.len;i++){
+            unsigned old_len=len;
+            len=Max(len,a.len);
+            for(unsigned i=1;i<=len;i++){
                 ll sum=temp;
-                if(i<=len)
+                if(i<=old_len)
                     sum+=num[i];
                 if(i<=a.len)
                     sum+=a.num[i];
-                res.num[i]=(int)(sum%BASE);
+                num[i]=(int)(sum%BASE);
                 temp=sum/BASE;
             }
             if(temp)
-                res.num[++res.len]=temp;
-            res.num[0]=num[0];
+                num[++len]=temp;
         }
         else{
             bool this_large=this->abs()>=a.abs();
             const bigint &larger=this_large?*this:a;
             const bigint &smaller=this_large?a:*this;
-            res.len=larger.len;
+            unsigned new_len=larger.len;
             ll temp=0;
-            for(unsigned i=1;i<=res.len;i++){
+            for(unsigned i=1;i<=new_len;i++){
                 ll diff=(ll)larger.num[i]-temp;
                 if(i<=smaller.len)
                     diff-=smaller.num[i];
@@ -186,44 +185,39 @@ public:
                 }
                 else
                     temp=0;
-                res.num[i]=diff;
+                num[i]=diff;
             }
-            while(res.len>1&&res.num[res.len]==0)
-                res.len--;
-            if(this_large)
-                res.num[0]=num[0];
-            else
-                res.num[0]=a.num[0];
-            if(res.len==1&&res.num[1]==0)
-                res.num[0]=0;
+            len=new_len;
+            while(len>1&&num[len]==0)
+                len--;
+            num[0]=this_large?num[0]:a.num[0];
+            if(len==1&&num[1]==0)
+                num[0]=0;
         }
-        return res;
-    }
-    bigint operator+=(const bigint &a){
-        *this=*this+a;
         return *this;
     }
-    bigint operator-(const bigint &a)const{
+    bigint &operator-=(const bigint &a){
         bigint temp=a;
         temp.num[0]^=1;
-        return *this+temp;
+        return *this+=temp;
     }
-    bigint operator-=(const bigint &a){
-        *this=*this-a;
-        return *this;
-    }
-    bigint operator*(const bigint &a)const{
-        bigint res;
-        if((len==1&&num[1]==0)||(a.len==1&&a.num[1]==0))
-            return res;
-        res.num[0]=num[0]^a.num[0];
+    bigint &operator*=(const bigint &a){
+        if((len==1&&num[1]==0)||(a.len==1&&a.num[1]==0)){
+            init();
+            return *this;
+        }
+        unsigned old_len=len;
+        int old_num[Size];
+        memcpy(old_num,num,sizeof(num));
+        init();
+        num[0]=old_num[0]^a.num[0];
         unsigned len_sum=1;
-        while(len_sum<len+a.len)
+        while(len_sum<old_len+a.len)
             len_sum<<=1;
-        comp *fa=new comp[len_sum]();
-        comp *fb=new comp[len_sum]();
-        for(unsigned i=0;i<len;i++)
-            fa[i]={(double)num[i+1],0};
+        comp fa[2*Size]={};
+        comp fb[2*Size]={};
+        for(unsigned i=0;i<old_len;i++)
+            fa[i]={(double)old_num[i+1],0};
         for(unsigned i=0;i<a.len;i++)
             fb[i]={(double)a.num[i+1],0};
         fft(fa,len_sum,1);
@@ -231,24 +225,27 @@ public:
         for(unsigned i=0;i<len_sum;i++)
             fa[i]=fa[i]*fb[i];
         fft(fa,len_sum,-1);
-        res.len=len+a.len;
+        len=old_len+a.len;
         ll temp=0;
-        for(unsigned i=0;i<res.len;i++){
+        for(unsigned i=0;i<len;i++){
             ll val=(ll)round(fa[i].real)+temp;
-            res.num[i+1]=(int)(val%BASE);
+            num[i+1]=(int)(val%BASE);
             temp=val/BASE;
         }
         if(temp)
-            res.num[++res.len]=temp;
-        while(res.len>1&&res.num[res.len]==0)
-            res.len--;
-        delete[] fa;
-        delete[] fb;
-        return res;
-    }
-    bigint operator*=(const bigint &a){
-        *this=*this*a;
+            num[++len]=temp;
+        while(len>1&&num[len]==0)
+            len--;
         return *this;
+    }
+    friend bigint operator+(const bigint &a,const bigint &b){
+        return bigint(a)+=b;
+    }
+    friend bigint operator-(const bigint &a,const bigint &b){
+        return bigint(a)-=b;
+    }
+    friend bigint operator*(const bigint &a,const bigint &b){
+        return bigint(a)*=b;
     }
     bigint abs()const{
         bigint res=*this;
