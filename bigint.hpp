@@ -6,19 +6,69 @@
 #include<iostream>
 #include<cstring>
 #include<iomanip>
-#include"my_algorithm.hpp"//Provide FFT
+#include<cmath>
+typedef long long ll;
+namespace __FFT{
+    constexpr double PI2=6.283185307179586231995927;
+    struct comp{
+        double real,imag;
+        comp(double real=0,double imag=0):real(real),imag(imag){}
+        comp operator+(const comp &x)const{
+            return comp(real+x.real,imag+x.imag);
+        }
+        comp operator-(const comp &x)const{
+            return comp(real-x.real,imag-x.imag);
+        }
+        comp operator*(const comp &x)const{
+            return comp(real*x.real-imag*x.imag,real*x.imag+x.real*imag);
+        }
+    };
+    inline void fft(comp *f,unsigned n,int rev){
+        for(unsigned i=1,j=n>>1;i<n-1;i++){
+            if(i<j)
+                std::swap(f[i],f[j]);
+            unsigned k=n>>1;
+            while(j>=k){
+                j-=k;
+                k>>=1;
+            }
+            j+=k;
+        }
+        for(unsigned l=2;l<=n;l<<=1){
+            double arg=PI2*rev/l;
+            comp wn(cos(arg),sin(arg));
+            for(unsigned i=0;i<n;i+=l){
+                comp w(1,0);
+                for(unsigned j=0;j<(l>>1);j++){
+                    comp f1=f[i+j],f2=f[i+j+(l>>1)]*w;
+                    f[i+j]=f1+f2;
+                    f[i+j+(l>>1)]=f1-f2;
+                    w=w*wn;
+                }
+            }
+        }
+        if(!~rev)
+            for(unsigned i=0;i<n;i++)
+                f[i].real/=n;
+        return;
+    }
+}
 template<const unsigned Size>
 class bigint{
 private:
     unsigned len;
     int num[Size];
     inline void init(){
-        memset(num,0,sizeof(num));
+        memset(num,0,sizeof(int)*(len+2));
         len=1;
     }
 public:
     bigint(){
         init();
+    }
+    template<typename T>
+    bigint(const T &x){
+        *this=x;
     }
     friend std::ostream &operator<<(std::ostream &out,const bigint &x){
         if(x.num[0])
@@ -34,28 +84,9 @@ public:
         x=s;
         return in;
     }
-    void get_num(std::string s){
-        init();
-        int f=0;
-        unsigned slen=s.length();
-        if(s[0]=='-')
-            num[0]=f=1;
-        len=0;
-        unsigned temp=0,w=1;
-        for(int i=slen-1;i>=f;i--){
-            temp+=(s[i]^48)*w;
-            w=(w<<1)+(w<<3);
-            if(w==BASE||i==f){
-                num[++len]=(int)temp;
-                temp=0;
-                w=1;
-            }
-        }
-        if(temp||len==0)
-            num[++len]=temp;
-    }
     template<typename T>
     bigint &operator=(const T &a){
+        init();
         T x=a;
         if(x<0)
             num[0]=1,x=~x+1;
@@ -171,7 +202,7 @@ public:
         if(num[0]==a.num[0]){
             ll temp=0;
             unsigned old_len=len;
-            len=Max(len,a.len);
+            len=std::max(len,a.len);
             for(unsigned i=1;i<=len;i++){
                 ll sum=temp;
                 if(i<=old_len)
@@ -217,6 +248,7 @@ public:
         return *this+=temp;
     }
     bigint &operator*=(const bigint &a){
+        using namespace __FFT;
         if((len==1&&num[1]==0)||(a.len==1&&a.num[1]==0)){
             init();
             return *this;
@@ -253,6 +285,26 @@ public:
             len--;
         return *this;
     }
+    bigint &operator++(){
+        *this+=bigint(1);
+        return *this;
+    }
+    bigint &operator--(){
+        *this-=1;
+        return *this;
+    }
+    template<typename T>
+    bigint operator++(T){
+        bigint res=*this;
+        ++*this;
+        return res;
+    }
+    template<typename T>
+    bigint operator--(T){
+        bigint res=*this;
+        --*this;
+        return res;
+    }
     friend bigint operator+(const bigint &a,const bigint &b){
         return bigint(a)+=b;
     }
@@ -266,34 +318,6 @@ public:
         bigint res=*this;
         res.num[0]=0;
         return res;
-    }
-    void read(){
-        init();
-        std::string s;
-        char ch=getchar();
-        while(ch<'0'||ch>'9'){
-            if(ch=='-')
-                s.push_back('-');
-            ch=getchar();
-        }
-        while(ch>='0'&&ch<='9'){
-            s.push_back(ch);
-            ch=getchar();
-        }
-        get_num(s);
-    }
-    void print(){
-        if(num[0])
-            putchar('-');
-        bool leading_zero=1;
-        for(int i=len;i;i--){
-            if(leading_zero)
-                printf("%d",num[i]);
-            else
-                printf("%02d",num[i]);
-            leading_zero=0;
-        }
-        return;
     }
 };
 template<const unsigned Size>
