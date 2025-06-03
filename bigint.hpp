@@ -3,22 +3,36 @@
 #define BIGINT
 #define BASE 100ll
 //Due to the precision issues of FFT,more aggressive digit compression cannot be performed.
-#include<cstdio>
+#include<iostream>
 #include<cstring>
-#include<string>
-#include"my_algorithm.hpp"
+#include<iomanip>
+#include"my_algorithm.hpp"//Provide FFT
 template<const unsigned Size>
 class bigint{
 private:
     unsigned len;
     int num[Size];
-    void init(){
+    inline void init(){
         memset(num,0,sizeof(num));
         len=1;
     }
 public:
     bigint(){
         init();
+    }
+    friend std::ostream &operator<<(std::ostream &out,const bigint &x){
+        if(x.num[0])
+            out<<'-';
+        out<<x.num[x.len];
+        for(int i=x.len-1;i;i--)
+            out<<std::setw(2)<<std::setfill('0')<<x.num[i];
+        return out;
+    }
+    friend std::istream &operator>>(std::istream &in,bigint &x){
+        std::string s;
+        in>>s;
+        x=s;
+        return in;
     }
     void get_num(std::string s){
         init();
@@ -41,7 +55,7 @@ public:
             num[++len]=temp;
     }
     template<typename T>
-    bigint operator=(const T &a){
+    bigint &operator=(const T &a){
         T x=a;
         if(x<0)
             num[0]=1,x=~x+1;
@@ -52,6 +66,7 @@ public:
         }
         return *this;
     }
+    bigint &operator=(const std::string &a);
     bool operator<(const bigint &a)const{
         if(num[0]&&!a.num[0])
             return 1;
@@ -278,9 +293,30 @@ public:
                 printf("%02d",num[i]);
             leading_zero=0;
         }
-        putchar('\n');
         return;
     }
 };
+template<const unsigned Size>
+bigint<Size> &bigint<Size>::operator=(const std::string &a){
+    init();
+    int f=0;
+    unsigned slen=a.length();
+    if(slen>0&&a[0]=='-')
+        num[0]=f=1;
+    len=0;
+    unsigned temp=0,w=1;
+    for(int i=slen-1;i>=f;i--){
+        temp+=(a[i]^48)*w;
+        w=(w<<1)+(w<<3);
+        if(w==BASE||i==f){
+            num[++len]=(int)temp;
+            temp=0;
+            w=1;
+        }
+    }
+    if(temp||len==0)
+        num[++len]=temp;
+    return *this;
+}
 #undef BASE
 #endif
